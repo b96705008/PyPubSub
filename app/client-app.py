@@ -7,7 +7,7 @@ from kafka import KafkaConsumer, KafkaProducer
 import SimpleHTTPServer
 import SocketServer
 
-APP_DIR = os.path.dirname(os.path.realpath(__file__))
+SCRIPT = '/Users/roger19890107/Developer/main/projects/cathay/hippo/PyPubSub/scripts/submit.sh'
 PORT = 8000
 
 class SparkJobSubmitter(Thread):
@@ -34,8 +34,8 @@ class SparkJobSubmitter(Thread):
 
 	def call_job_on_system(self):
 		code = subprocess.call([
-			"spark-submit",
-			"{}/spark-app.py".format(APP_DIR)
+			'/bin/sh',
+			SCRIPT
 		])
 		print("submit spark job result: {}".format(code))
 		self.pub_job_result(code)
