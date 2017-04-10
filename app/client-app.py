@@ -32,6 +32,10 @@ class SparkJobSubmitter(Thread):
 		# producer
 		self.producer = KafkaProducer(bootstrap_servers='localhost:9092')
 
+	def pub_job_result(self, code):
+		pub_msg = b"{} finish spark-job with code: {}".format(self.hippo_name, code)
+		self.producer.send(self.pub_topic, pub_msg)
+
 	def call_job_on_system(self):
 		code = subprocess.call([
 			'/bin/sh',
@@ -46,10 +50,6 @@ class SparkJobSubmitter(Thread):
 			self.executor.submit(self.call_job_on_system)
 		else:
 			self.call_job_on_system()
-
-	def pub_job_result(self, code):
-		pub_msg = b"{} finish spark-job with code: {}".format(self.hippo_name, code)
-		self.producer.send(self.pub_topic, pub_msg)
 
 	def run(self):
 		for message in self.consumer:
