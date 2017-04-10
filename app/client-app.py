@@ -48,9 +48,8 @@ class SparkJobSubmitter(Thread):
 			self.call_job_on_system()
 
 	def pub_job_result(self, code):
-		self.producer.send(
-			self.pub_topic,
-			b"{} finish spark-job with code: {}".format(self.hippo_name, code))
+		pub_msg = b"{} finish spark-job with code: {}".format(self.hippo_name, code)
+		self.producer.send(self.pub_topic, pub_msg)
 
 	def run(self):
 		for message in self.consumer:
@@ -62,7 +61,7 @@ class SparkJobSubmitter(Thread):
 
 if __name__ == '__main__':
 	print("Start kafka consumer...")
-	submitter = SparkJobSubmitter("batch.etl.test", 3)
+	submitter = SparkJobSubmitter("batch.etl.test", 1)
 	submitter.start()
 
 	# == start a server ==
