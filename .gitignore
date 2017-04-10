@@ -103,4 +103,4 @@ ENV/
 metastore_db
 derby.log
 spark-warehouse
-output
+outputs
