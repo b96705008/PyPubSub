@@ -104,3 +104,6 @@ metastore_db
 derby.log
 spark-warehouse
 outputs
+
+# MAC
+.DS_Store
