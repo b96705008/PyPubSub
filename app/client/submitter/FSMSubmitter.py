@@ -1,49 +1,73 @@
 from __future__ import print_function
 import time
 from transitions import Machine
+from threading import Timer
 from BasicSubmitter import BasicSubmitter
 
 
+# Aim to collect all the required messages before submit job
 class FSMSubmitter(BasicSubmitter):
 	states = ['idle', 'waiting', 'submitting']
 
-	def __init__(self, hippo_name, need_tables):
+	def __init__(self, hippo_name, need_msgs, wait_secs=None):
 		BasicSubmitter.__init__(self, hippo_name)
 
-		self.need_tables = need_tables
-		self.curr_tables = set({})
+		# fsm related
+		self.need_msgs = need_msgs
+		self.curr_msgs = set({})
 		self.machine = Machine(model=self, states=type(self).states, initial='idle')
 
+		# timeout
+		self.timer = None
+		self.wait_secs = wait_secs
+
 		# idle -> waiting
-		self.machine.add_transition('add_table', '*', 'waiting', conditions=['shoud_wait'])
-		self.machine.add_transition('add_table', '*', 'submitting', conditions=['is_ready'], after='submit_job')
+		self.machine.add_transition('new_msg', '*', 'waiting', conditions=['shoud_wait'], after='refresh_timer')
+		self.machine.add_transition('new_msg', '*', 'submitting', conditions=['is_ready'], after='submit_job')
 		self.machine.add_transition('finish', '*', 'idle', after='refresh')
 
+	def stop_timer(self):
+		if self.timer is not None:
+			self.timer.cancel()
+			self.timer = None
+
+	def on_timeout(self):
+		print('timeout!!')
+		self.finish()
+
+	def refresh_timer(self):
+		self.stop_timer()
+		if self.wait_secs is not None:
+			self.timer = Timer(self.wait_secs, self.on_timeout)
+			self.timer.start()
+
 	def shoud_wait(self):
-		return len(self.need_tables - self.curr_tables) > 0
+		return len(self.need_msgs - self.curr_msgs) > 0
 
 	def is_ready(self):
-		return len(self.need_tables - self.curr_tables) == 0
+		return len(self.need_msgs - self.curr_msgs) == 0
 
 	def refresh(self):
-		self.curr_tables = set()
+		self.stop_timer()
+		self.curr_msgs = set()
 
-	def receive_table(self, table):
-		self.curr_tables.add(table)
-		self.add_table()
+	def receive_msg(self, msg):
+		self.curr_msgs.add(msg)
+		self.new_msg()
 
 	def print_status(self):
-		print("state: {}, received_tables: {}".format(self.state, self.curr_tables))
+		print("state: {}, received_msgs: {}".format(self.state, self.curr_msgs))
 
 	# == over write ===
 	def submit_job(self):
 		print("Start submit spark job...")
+		self.stop_timer()
 		self.call_job_on_system()
 		self.finish()
 
 	def run(self):
 		for message in self.consumer:
 			print(message)
-			t = message.value
-			self.receive_table(t)
+			m = message.value
+			self.receive_msg(m)
 			self.print_status()

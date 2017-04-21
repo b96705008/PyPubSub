@@ -9,7 +9,7 @@ if __name__ == '__main__':
 	print("Start kafka consumer...")
 	#submitter = BasicSubmitter("batch.etl.test")
 	#submitter = ThreadPoolSubmitter("batch.etl.test", max_workers=3)
-	submitter = FSMSubmitter("batch.etl.test", need_tables={'A', 'B', 'C'})
+	submitter = FSMSubmitter("batchetl.test", need_msgs={'A', 'B', 'C'}, wait_secs=5.0)
 	submitter.start()
 
 	# == start a server ==

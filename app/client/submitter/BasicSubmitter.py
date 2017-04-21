@@ -18,7 +18,7 @@ class BasicSubmitter(Thread):
 		# consumer
 		self.consumer = KafkaConsumer(bootstrap_servers='localhost:9092',
 								 	  auto_offset_reset='latest',
-								 	  group_id='test_group')
+								 	  group_id=hippo_name)
 		self.consumer.subscribe(self.sub_topics)
 
 		# producer
