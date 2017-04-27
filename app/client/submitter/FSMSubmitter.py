@@ -3,6 +3,7 @@ import time
 from transitions import Machine
 from threading import Timer
 from BasicSubmitter import BasicSubmitter
+import time
 
 
 # Aim to collect all the required messages before submit job
@@ -23,7 +24,7 @@ class FSMSubmitter(BasicSubmitter):
 
 		# idle -> waiting
 		self.machine.add_transition('new_msg', '*', 'waiting', conditions=['shoud_wait'], after='refresh_timer')
-		self.machine.add_transition('new_msg', '*', 'submitting', conditions=['is_ready'], after='submit_job')
+		self.machine.add_transition('new_msg', '*', 'submitting', conditions=['is_ready'])#, after='submit_job')
 		self.machine.add_transition('finish', '*', 'idle', after='refresh')
 
 	def stop_timer(self):
@@ -66,8 +67,16 @@ class FSMSubmitter(BasicSubmitter):
 		self.finish()
 
 	def run(self):
-		for message in self.consumer:
-			print(message)
-			m = message.value
-			self.receive_msg(m)
-			self.print_status()
+		while True:
+			self.start_consumer()
+			for message in self.consumer:
+				print(message)
+				m = message.value
+				self.receive_msg(m)
+				self.print_status()
+
+				if self.state == 'submitting':
+					self.consumer.close()
+					self.submit_job()
+					break
+				

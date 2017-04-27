@@ -1,19 +1,25 @@
 from __future__ import print_function
 from concurrent import futures
+import time
 from BasicSubmitter import BasicSubmitter
 
 class ThreadPoolSubmitter(BasicSubmitter):
 
-	def __init__(self, hippo_name, need_tables):
+	def __init__(self, hippo_name, max_workers):
 		BasicSubmitter.__init__(self, hippo_name)
-		self.executor = None
 		self.max_workers = max_workers
-		if max_workers > 1:
-			self.executor = futures.ThreadPoolExecutor(max_workers=max_workers)
+		self.executor = futures.ThreadPoolExecutor(max_workers=max_workers)
+		# consumer
+		self.start_consumer()
 
 	def submit_job(self):
 		print("======Submit async job for worker=======")
-		if self.max_workers > 1:
-			self.executor.submit(self.call_job_on_system)
-		else:
-			self.call_job_on_system()
+		self.executor.submit(self.call_job_on_system)
+
+	def run(self):
+		for message in self.consumer:
+			print(message)
+			v = message.value
+			if v == "submit":
+				self.submit_job()
+

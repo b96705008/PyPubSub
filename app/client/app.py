@@ -8,8 +8,8 @@ PORT = 8000
 if __name__ == '__main__':
 	print("Start kafka consumer...")
 	#submitter = BasicSubmitter("batch.etl.test")
-	#submitter = ThreadPoolSubmitter("batch.etl.test", max_workers=3)
-	submitter = FSMSubmitter("batchetl.test", need_msgs={'A', 'B', 'C'}, wait_secs=5.0)
+	submitter = ThreadPoolSubmitter("batch.etl.test", max_workers=1)
+	#submitter = FSMSubmitter("batchetl.test", need_msgs={'A', 'B', 'C'}, wait_secs=25.0)
 	submitter.start()
 
 	# == start a server ==
