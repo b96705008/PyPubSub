@@ -2,7 +2,7 @@
 
 ## Folder structure
 ### app
-* submit_client.py: your message client 
+* submit_client.py: your message client (inherent from lib/message_client/basic/BasicClient)
 
 ### bin
 * start-client.sh: start client app script
