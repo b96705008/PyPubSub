@@ -41,6 +41,11 @@ bin/kafka-console-consumer.sh --bootstrap-server localhost:9092 --topic hippo-fi
 bin/kafka-console-producer.sh --broker-list localhost:9092 --topic frontier-adw
 ```
 
+### Install Client app dependencies (in App foler)
+```
+pip install -r requirements.txt
+```
+
 ### Start Submit Client (in App folder)
 ```
 ./bin/start-client.sh env
